@@ -13,18 +13,17 @@ function EmptyStateMessage({isFullScreen}) {
     >
       <div
         className={`${
-          isFullScreen ? "w-20 h-20" : "w-10 h-10"
+          isFullScreen ? "w-20 h-20" : "w-16 h-16"
         } bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-lg`}
       >
         <MessageSquare
-          className={`${isFullScreen ? "w-10 h-10" : "w-5 h-5"} text-white`}
+          className={`${isFullScreen ? "w-10 h-10" : "w-8 h-8"} text-white`}
         />
       </div>
 
-      {/* عنوان */}
       <h3
         className={`${
-          isFullScreen ? "text-lg" : "text-sm"
+          isFullScreen ? "text-lg" : "text-base"
         } font-bold text-gray-800 mb-2 sm:mb-3`}
       >
         به پشتیبانی هوشمند خوش آمدید
