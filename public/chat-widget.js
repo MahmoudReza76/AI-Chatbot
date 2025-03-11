@@ -6,8 +6,7 @@ window.initChatWidget = function (options) {
   document.body.appendChild(container);
 
   const iframe = document.createElement("iframe");
-  iframe.src = "https://your-domain.com/widget"; // صفحه‌ی ویجت شما
-  iframe.style.position = "fixed";
+  iframe.src = "https://your-domain.com/widget";
   iframe.style.bottom = "20px";
   iframe.style.right = "20px";
   iframe.style.width = "400px";
