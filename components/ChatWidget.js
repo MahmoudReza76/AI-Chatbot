@@ -99,9 +99,9 @@ function ChatWidget() {
                   for (const content of data.delta.content) {
                     if (content.type === "text" && content.text?.value) {
                       const textChunk = content.text.value;
+                      console.log(textChunk);
                       fullMessageContent += textChunk;
-                      console.log(fullMessageContent);
-
+                  
                       setMessages((prev) =>
                         prev.map((msg) =>
                           msg.id === tempMessageId
