@@ -6,7 +6,7 @@ window.initChatWidget = function (options) {
   document.body.appendChild(container);
 
   const iframe = document.createElement("iframe");
-  iframe.src = "https://your-domain.com/widget";
+  iframe.src = "https://ai-chatbot-eta-six-79.vercel.app/widget";
   iframe.style.bottom = "20px";
   iframe.style.right = "20px";
   iframe.style.width = "400px";

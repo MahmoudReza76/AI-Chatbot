@@ -3,7 +3,7 @@
   window.ChatBotLoaded = true;
 
   const script = document.createElement("script");
-  script.src = "https://your-domain.com/chat-widget.js"; // مسیر اسکریپت ویجت شما
+  script.src = "https://ai-chatbot-eta-six-79.vercel.app/widget";
   script.async = true;
   document.head.appendChild(script);
 
