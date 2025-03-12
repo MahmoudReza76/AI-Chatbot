@@ -22,6 +22,7 @@ function ChatWidget() {
       try {
         const newThreadId = await createThread();
         setThreadId(newThreadId);
+        console.log("Thread created with ID:", newThreadId);
       } catch (error) {
         console.error("Error initializing chat:", error);
       }
@@ -45,90 +46,91 @@ function ChatWidget() {
     setIsTyping(true);
 
     try {
+      console.log("Sending message to API with threadId:", threadId);
       await sendMessage(threadId, newMessage);
 
-      const response = await runWithStream(threadId, assistantId);
+      console.log(
+        "Starting Run with threadId:",
+        threadId,
+        "and assistantId:",
+        assistantId
+      );
 
-      // ایجاد پیام موقت برای نمایش پاسخ حین دریافت
-      const currentMessageId = Date.now();
-
+      const stream = await runWithStream(threadId, assistantId);
+      const tempMessageId = uuidv4();
       setMessages((prev) => [
         ...prev,
         {
-          id: currentMessageId,
+          id: tempMessageId,
           text: "",
           sender: "support",
           timestamp: new Date(),
           status: "typing"
         }
       ]);
+      const reader = stream.getReader();
+      const decoder = new TextDecoder();
 
-      if (response.body) {
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
+      let fullMessageContent = "";
 
-        let buffer = "";
+      while (true) {
+        const {done, value} = await reader.read();
 
-        while (true) {
-          const {done, value} = await reader.read();
+        if (done) {
+          break;
+        }
 
-          if (done) break;
+        const chunk = decoder.decode(value, {stream: true});
 
-          buffer += decoder.decode(value, {stream: true});
+        const lines = chunk.split("\n").filter((line) => line.trim());
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const dataContent = line.substring(6);
 
-          const lines = buffer.split("\n");
-          buffer = lines.pop() || "";
+              if (dataContent.trim() === "[DONE]") {
+                continue;
+              }
 
-          for (const line of lines) {
-            if (line.trim().startsWith("data: ")) {
-              const jsonStr = line.replace(/^data: /, "").trim();
+              const data = JSON.parse(dataContent);
 
-              if (jsonStr === "[DONE]") continue;
-
-              try {
-                const parsedData = JSON.parse(jsonStr);
-                console.log(parsedData);
-                // پردازش داده‌های دریافتی از stream
-                if (
-                  parsedData.object === "thread.message.delta" &&
-                  parsedData.delta?.content?.length > 0
-                ) {
-                  for (const content of parsedData.delta.content) {
+              if (data.object === "thread.message.delta") {
+                if (data.delta?.content?.length > 0) {
+                  for (const content of data.delta.content) {
                     if (content.type === "text" && content.text?.value) {
-                      // به‌روزرسانی پیام مستقیماً با هر چانک دریافتی
-                      setMessages((prevMessages) => {
-                        return prevMessages.map((msg) => {
-                          if (msg.id === currentMessageId) {
-                            return {
-                              ...msg,
-                              text: msg.text + content.text.value
-                            };
-                          }
-                          return msg;
-                        });
-                      });
+                      const textChunk = content.text.value;
+                      fullMessageContent += textChunk;
+                      console.log(fullMessageContent);
+
+                      setMessages((prev) =>
+                        prev.map((msg) =>
+                          msg.id === tempMessageId
+                            ? {...msg, text: fullMessageContent}
+                            : msg
+                        )
+                      );
                     }
                   }
                 }
-
-                // بررسی وضعیت تکمیل فرآیند
-                if (parsedData.status === "completed") {
-                  setIsTyping(false);
-                  setMessages((prevMessages) => {
-                    return prevMessages.map((msg) => {
-                      if (msg.id === currentMessageId) {
-                        return {
-                          ...msg,
-                          status: "received"
-                        };
-                      }
-                      return msg;
-                    });
-                  });
-                }
-              } catch (error) {
-                console.error("Error parsing streaming data:", error);
               }
+
+              if (data.status === "completed") {
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === tempMessageId
+                      ? {...msg, status: "received"}
+                      : msg
+                  )
+                );
+                setIsTyping(false);
+              }
+            } catch (parseError) {
+              console.error(
+                "Error parsing JSON:",
+                parseError,
+                "Text:",
+                line.substring(6)
+              );
             }
           }
         }

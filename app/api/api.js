@@ -125,23 +125,27 @@ export const submitToolOutputs = async (threadId, runId, toolOutputs) => {
   return await response.json();
 };
 
+//runWithStream
 export const runWithStream = async (threadId, assistantId) => {
-  const response = await fetch(`${baseUrl}/Threads/${threadId}/Runs`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      assistant_id: assistantId,
-      stream: true
-    })
-  });
+  try {
+    const response = await fetch(`${baseUrl}/Threads/${threadId}/Runs`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        assistant_id: assistantId,
+        stream: true
+      })
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`API error: ${JSON.stringify(errorData)}`);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API error: ${JSON.stringify(errorData)}`);
+    }
+    return response.body;
+  } catch (error) {
+    throw error;
   }
-
-  return response;
 };
