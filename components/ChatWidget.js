@@ -1,5 +1,4 @@
 "use client";
-
 import {useState, useEffect} from "react";
 import {v4 as uuidv4} from "uuid";
 import {createThread, sendMessage, runWithStream} from "@/app/api/api";
@@ -16,19 +15,42 @@ function ChatWidget() {
   const [threadId, setThreadId] = useState(null);
   const [assistantId] = useState("asst_0WxKHzZZugGKJqj0IT5OJQFy");
   const [isFullScreen, setIsFullScreen] = useState(false);
+  // اضافه کردن یک state برای ذخیره آخرین وضعیت باز/بسته بودن چت
+  const [previousOpenState, setPreviousOpenState] = useState(false);
 
   useEffect(() => {
     const initializeChat = async () => {
       try {
         const newThreadId = await createThread();
         setThreadId(newThreadId);
-        console.log("Thread created with ID:", newThreadId);
       } catch (error) {
         console.error("Error initializing chat:", error);
       }
     };
     initializeChat();
   }, []);
+
+  // نظارت بر تغییرات وضعیت باز/بسته بودن چت
+  useEffect(() => {
+    if (isOpen !== previousOpenState) {
+      // اگر چت بسته شد و بعد دوباره باز شد، پیام‌های قبلی را به عنوان animated علامت‌گذاری می‌کنیم
+      if (isOpen && !previousOpenState) {
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) => ({...msg, animated: true}))
+        );
+      }
+      setPreviousOpenState(isOpen);
+    }
+  }, [isOpen, previousOpenState]);
+
+  // هندلری برای علامت‌گذاری یک پیام به عنوان animated شده
+  const handleMessageAnimated = (messageId) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) =>
+        msg.id === messageId ? {...msg, animated: true} : msg
+      )
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,15 +68,7 @@ function ChatWidget() {
     setIsTyping(true);
 
     try {
-      console.log("Sending message to API with threadId:", threadId);
       await sendMessage(threadId, newMessage);
-
-      console.log(
-        "Starting Run with threadId:",
-        threadId,
-        "and assistantId:",
-        assistantId
-      );
 
       const stream = await runWithStream(threadId, assistantId);
       const tempMessageId = uuidv4();
@@ -65,7 +79,11 @@ function ChatWidget() {
           text: "",
           sender: "support",
           timestamp: new Date(),
-          status: "typing"
+          status: "typing",
+          // پیام جدید باید انیمیشن داشته باشد
+          animated: false,
+          // اضافه کردن کالبک برای زمانی که انیمیشن کامل می‌شود
+          onTypingComplete: handleMessageAnimated
         }
       ]);
       const reader = stream.getReader();
@@ -99,9 +117,8 @@ function ChatWidget() {
                   for (const content of data.delta.content) {
                     if (content.type === "text" && content.text?.value) {
                       const textChunk = content.text.value;
-                      console.log(textChunk);
                       fullMessageContent += textChunk;
-                  
+
                       setMessages((prev) =>
                         prev.map((msg) =>
                           msg.id === tempMessageId
@@ -112,17 +129,6 @@ function ChatWidget() {
                     }
                   }
                 }
-              }
-
-              if (data.status === "completed") {
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === tempMessageId
-                      ? {...msg, status: "received"}
-                      : msg
-                  )
-                );
-                setIsTyping(false);
               }
             } catch (parseError) {
               console.error(
@@ -148,14 +154,32 @@ function ChatWidget() {
           text: "متأسفانه در پردازش پیام شما خطایی رخ داد. لطفاً دوباره تلاش کنید.",
           sender: "support",
           timestamp: new Date(),
-          status: "error"
+          status: "error",
+          animated: false,
+          onTypingComplete: handleMessageAnimated
         }
       ]);
     }
   };
 
   const toggleFullScreen = () => {
+    // وقتی وضعیت تمام‌صفحه تغییر می‌کند، پیام‌های قبلی را به عنوان animated علامت‌گذاری می‌کنیم
+    if (!isFullScreen) {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => ({...msg, animated: true}))
+      );
+    }
     setIsFullScreen(!isFullScreen);
+  };
+
+  const toggleChat = () => {
+    // وقتی وضعیت چت تغییر می‌کند، پیام‌های قبلی را به عنوان animated علامت‌گذاری می‌کنیم
+    if (!isOpen) {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => ({...msg, animated: true}))
+      );
+    }
+    setIsOpen(!isOpen);
   };
 
   const quickResponses = [
@@ -172,7 +196,7 @@ function ChatWidget() {
       dir="rtl"
     >
       {!isFullScreen && (
-        <ToggleChatButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+        <ToggleChatButton isOpen={isOpen} onClick={toggleChat} />
       )}
 
       {(isOpen || isFullScreen) && (
