@@ -1,5 +1,4 @@
 "use client";
-
 import {useState, useEffect} from "react";
 import {v4 as uuidv4} from "uuid";
 import {createThread, sendMessage, runWithStream} from "@/app/api/api";
@@ -22,7 +21,6 @@ function ChatWidget() {
       try {
         const newThreadId = await createThread();
         setThreadId(newThreadId);
-        console.log("Thread created with ID:", newThreadId);
       } catch (error) {
         console.error("Error initializing chat:", error);
       }
@@ -46,15 +44,7 @@ function ChatWidget() {
     setIsTyping(true);
 
     try {
-      console.log("Sending message to API with threadId:", threadId);
       await sendMessage(threadId, newMessage);
-
-      console.log(
-        "Starting Run with threadId:",
-        threadId,
-        "and assistantId:",
-        assistantId
-      );
 
       const stream = await runWithStream(threadId, assistantId);
       const tempMessageId = uuidv4();
@@ -100,7 +90,6 @@ function ChatWidget() {
                     if (content.type === "text" && content.text?.value) {
                       const textChunk = content.text.value;
                       fullMessageContent += textChunk;
-                      console.log(fullMessageContent);
 
                       setMessages((prev) =>
                         prev.map((msg) =>
@@ -112,17 +101,6 @@ function ChatWidget() {
                     }
                   }
                 }
-              }
-
-              if (data.status === "completed") {
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === tempMessageId
-                      ? {...msg, status: "received"}
-                      : msg
-                  )
-                );
-                setIsTyping(false);
               }
             } catch (parseError) {
               console.error(

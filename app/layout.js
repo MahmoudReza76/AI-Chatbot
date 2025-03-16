@@ -1,14 +1,6 @@
 import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
-import {Roboto} from "next/font/google";
 import localFont from "next/font/local";
-
-// Roboto font
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["100", "300", "400", "500", "700", "900"],
-  variable: "--font-roboto"
-});
 
 // IRANSansX font
 const iranSansX = localFont({
@@ -30,9 +22,7 @@ export const metadata = {
 export default function RootLayout({children}) {
   return (
     <html lang="en">
-      <body className={`${roboto.className} ${iranSansX.className} `}>
-        {children}
-      </body>
+      <body className={`${iranSansX.className} `}>{children}</body>
     </html>
   );
 }

@@ -2,19 +2,9 @@
 
 import {useRef, useEffect} from "react";
 import {motion} from "framer-motion";
-import {
-  Bot,
-  Check,
-  CheckCheck,
-  MessageSquare,
-  HelpCircle,
-  Clock,
-  Star
-} from "lucide-react";
+import {Bot} from "lucide-react";
 import Message from "./Message";
 import EmptyStateMessage from "./EmptyStateMessage";
-
-// کامپوننت جدید برای حالت خالی
 
 function MessageList({messages, isTyping, isFullScreen}) {
   const messagesEndRef = useRef(null);
@@ -27,7 +17,6 @@ function MessageList({messages, isTyping, isFullScreen}) {
     scrollToBottom();
   }, [messages]);
 
-  // اگر پیامی وجود نداشت، حالت خالی را نمایش می‌دهیم
   if (messages.length === 0) {
     return (
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-primary/30 scrollbar-track-primary/10 scroll-smooth bg-gray-50">

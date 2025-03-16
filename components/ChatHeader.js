@@ -13,7 +13,10 @@ import {
 
 function ChatHeader({isFullScreen, toggleFullScreen, onClose}) {
   return (
-    <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 shadow-md">
+    <div
+      dir="rtl"
+      className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 shadow-md"
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="relative">

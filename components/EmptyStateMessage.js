@@ -98,7 +98,6 @@ function EmptyStateMessage({isFullScreen}) {
         </div>
       </div>
 
-      {/* متن پایین */}
       <div
         className={`mt-6 sm:mt-8 ${
           isFullScreen ? "text-sm" : "text-xs"
