@@ -11,13 +11,22 @@ import {
   TooltipTrigger
 } from "@/components/ui/tooltip";
 
-function TypewriterMessage({text, onTypingComplete = () => {}}) {
-  const [displayedText, setDisplayedText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTypingComplete, setIsTypingComplete] = useState(false);
+function TypewriterMessage({text, onTypingComplete = () => {}, shouldType}) {
+  const [displayedText, setDisplayedText] = useState(shouldType ? "" : text);
+  const [currentIndex, setCurrentIndex] = useState(
+    shouldType ? 0 : text.length
+  );
+  const [isTypingComplete, setIsTypingComplete] = useState(!shouldType);
   const [isCopied, setIsCopied] = useState(false);
+  const hasTypedRef = useRef(!shouldType);
 
   useEffect(() => {
+    if (!shouldType || hasTypedRef.current) {
+      setDisplayedText(text);
+      setIsTypingComplete(true);
+      return;
+    }
+
     let animationFrameId;
 
     const typeNextCharacter = () => {
@@ -27,6 +36,7 @@ function TypewriterMessage({text, onTypingComplete = () => {}}) {
         animationFrameId = requestAnimationFrame(typeNextCharacter);
       } else if (!isTypingComplete) {
         setIsTypingComplete(true);
+        hasTypedRef.current = true;
         onTypingComplete();
       }
     };
@@ -34,7 +44,7 @@ function TypewriterMessage({text, onTypingComplete = () => {}}) {
     animationFrameId = requestAnimationFrame(typeNextCharacter);
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [currentIndex, text, isTypingComplete, onTypingComplete]);
+  }, [currentIndex, text, isTypingComplete, onTypingComplete, shouldType]);
 
   return (
     <>
@@ -182,6 +192,9 @@ function Message({message}) {
     });
   };
 
+  const shouldType =
+    message.status === "typing" && message.sender === "support";
+
   return (
     <motion.div
       initial={{opacity: 0, y: 10}}
@@ -211,12 +224,11 @@ function Message({message}) {
             </div>
           )}
 
-          {message.status === "typing" && message.sender === "support" ? (
+          {message.sender === "support" && shouldType ? (
             <TypewriterMessage
               text={message.text}
-              onTypingComplete={() => {
-                // You could add an onTypingComplete handler here if needed
-              }}
+              shouldType={true}
+              onTypingComplete={() => {}}
             />
           ) : message.sender === "user" ? (
             <div className="text-xs leading-relaxed break-words text-white">
@@ -226,7 +238,6 @@ function Message({message}) {
             <div className="text-xs leading-relaxed break-words text-gray-800">
               <div className="flex flex-col">
                 <MarkdownContent content={message.text} />
-
                 <div className="flex mt-1 justify-end">
                   <TooltipProvider>
                     <Tooltip>
@@ -272,5 +283,4 @@ function Message({message}) {
     </motion.div>
   );
 }
-
 export default Message;
