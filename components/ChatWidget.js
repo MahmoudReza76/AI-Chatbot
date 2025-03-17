@@ -15,6 +15,7 @@ function ChatWidget() {
   const [threadId, setThreadId] = useState(null);
   const [assistantId] = useState("asst_0WxKHzZZugGKJqj0IT5OJQFy");
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [previousOpenState, setPreviousOpenState] = useState(false);
 
   useEffect(() => {
     const initializeChat = async () => {
@@ -27,6 +28,25 @@ function ChatWidget() {
     };
     initializeChat();
   }, []);
+
+  useEffect(() => {
+    if (isOpen !== previousOpenState) {
+      if (isOpen && !previousOpenState) {
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) => ({...msg, animated: true}))
+        );
+      }
+      setPreviousOpenState(isOpen);
+    }
+  }, [isOpen, previousOpenState]);
+
+  const handleMessageAnimated = (messageId) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) =>
+        msg.id === messageId ? {...msg, animated: true} : msg
+      )
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,7 +75,7 @@ function ChatWidget() {
           text: "",
           sender: "support",
           timestamp: new Date(),
-          status: "typing"
+          status: "typing" 
         }
       ]);
       const reader = stream.getReader();
@@ -79,6 +99,13 @@ function ChatWidget() {
               const dataContent = line.substring(6);
 
               if (dataContent.trim() === "[DONE]") {
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === tempMessageId
+                      ? {...msg, status: "sent"} 
+                      : msg
+                  )
+                );
                 continue;
               }
 
@@ -133,7 +160,21 @@ function ChatWidget() {
   };
 
   const toggleFullScreen = () => {
+    if (!isFullScreen) {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => ({...msg, animated: true}))
+      );
+    }
     setIsFullScreen(!isFullScreen);
+  };
+
+  const toggleChat = () => {
+    if (!isOpen) {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => ({...msg, animated: true}))
+      );
+    }
+    setIsOpen(!isOpen);
   };
 
   const quickResponses = [
@@ -150,7 +191,7 @@ function ChatWidget() {
       dir="rtl"
     >
       {!isFullScreen && (
-        <ToggleChatButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+        <ToggleChatButton isOpen={isOpen} onClick={toggleChat} />
       )}
 
       {(isOpen || isFullScreen) && (
