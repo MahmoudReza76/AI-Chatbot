@@ -74,10 +74,10 @@ function MarkdownContent({content}) {
     a: "text-blue-600 underline",
     code: "bg-gray-100 font-mono text-[0.9em] px-1 py-0.5 rounded",
     pre: "bg-gray-100 p-2 rounded my-3 overflow-x-auto",
-    ul: "list-disc pr-5 mb-3 space-y-1",
-    ol: "list-decimal pr-5 mb-3 space-y-1",
+    ul: "list-disc pr-5 mb-3 space-y-2",
+    ol: "list-decimal pr-5 mb-3 space-y-2",
     li: "mb-1",
-    h1: "text-sm font-bold mb-2",
+    h1: "text-sm font-bold mb-2 ",
     h2: "text-xs font-bold mb-2",
     h3: "text-xs font-semibold mb-1",
     blockquote: "border-gray-300 border-r-2 pr-2 italic my-2"
@@ -131,10 +131,10 @@ function UserMarkdownContent({content}) {
     a: "text-blue-100 underline",
     code: "bg-blue-500/30 font-mono text-[0.9em] px-1 py-0.5 rounded",
     pre: "bg-blue-500/20 p-2 rounded my-3 overflow-x-auto",
-    ul: "list-disc pr-5 mb-3 space-y-1",
-    ol: "list-decimal pr-5 mb-3 space-y-1",
+    ul: "list-disc pr-5 mb-3 space-y-2",
+    ol: "list-decimal pr-5 mb-3 space-y-2",
     li: "mb-1",
-    h1: "text-sm font-bold mb-2",
+    h1: "text-sm font-bold mb-2 ",
     h2: "text-xs font-bold mb-2",
     h3: "text-xs font-semibold mb-1",
     blockquote: "border-blue-300 border-r-2 pr-2 italic my-2"
@@ -217,7 +217,7 @@ function Message({message}) {
                 <Bot className="w-3.5 h-3.5 text-blue-600" />
               </div>
               <div>
-                <div className="text-xs font-medium text-gray-900">
+                <div className="text-xs font-bold text-black">
                   پشتیبان هوشمند
                 </div>
               </div>
@@ -259,7 +259,7 @@ function Message({message}) {
             </div>
           )}
         </div>
-        <div className="px-2.5 py-1.5 border-t border-gray-100/10 flex items-center justify-end">
+        <div className="px-2.5 py-1.5  flex items-center justify-end">
           <div className="flex items-center gap-1.5">
             <span
               className={`text-[10px] ${
