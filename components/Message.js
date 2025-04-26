@@ -11,13 +11,22 @@ import {
   TooltipTrigger
 } from "@/components/ui/tooltip";
 
-function TypewriterMessage({text, onTypingComplete = () => {}}) {
-  const [displayedText, setDisplayedText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTypingComplete, setIsTypingComplete] = useState(false);
+function TypewriterMessage({text, onTypingComplete = () => {}, shouldType}) {
+  const [displayedText, setDisplayedText] = useState(shouldType ? "" : text);
+  const [currentIndex, setCurrentIndex] = useState(
+    shouldType ? 0 : text.length
+  );
+  const [isTypingComplete, setIsTypingComplete] = useState(!shouldType);
   const [isCopied, setIsCopied] = useState(false);
+  const hasTypedRef = useRef(!shouldType);
 
   useEffect(() => {
+    if (!shouldType || hasTypedRef.current) {
+      setDisplayedText(text);
+      setIsTypingComplete(true);
+      return;
+    }
+
     let animationFrameId;
 
     const typeNextCharacter = () => {
@@ -27,6 +36,7 @@ function TypewriterMessage({text, onTypingComplete = () => {}}) {
         animationFrameId = requestAnimationFrame(typeNextCharacter);
       } else if (!isTypingComplete) {
         setIsTypingComplete(true);
+        hasTypedRef.current = true;
         onTypingComplete();
       }
     };
@@ -34,7 +44,7 @@ function TypewriterMessage({text, onTypingComplete = () => {}}) {
     animationFrameId = requestAnimationFrame(typeNextCharacter);
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [currentIndex, text, isTypingComplete, onTypingComplete]);
+  }, [currentIndex, text, isTypingComplete, onTypingComplete, shouldType]);
 
   return (
     <>
@@ -64,10 +74,10 @@ function MarkdownContent({content}) {
     a: "text-blue-600 underline",
     code: "bg-gray-100 font-mono text-[0.9em] px-1 py-0.5 rounded",
     pre: "bg-gray-100 p-2 rounded my-3 overflow-x-auto",
-    ul: "list-disc pr-5 mb-3 space-y-1",
-    ol: "list-decimal pr-5 mb-3 space-y-1",
+    ul: "list-disc pr-5 mb-3 space-y-2",
+    ol: "list-decimal pr-5 mb-3 space-y-2",
     li: "mb-1",
-    h1: "text-sm font-bold mb-2",
+    h1: "text-sm font-bold mb-2 ",
     h2: "text-xs font-bold mb-2",
     h3: "text-xs font-semibold mb-1",
     blockquote: "border-gray-300 border-r-2 pr-2 italic my-2"
@@ -121,10 +131,10 @@ function UserMarkdownContent({content}) {
     a: "text-blue-100 underline",
     code: "bg-blue-500/30 font-mono text-[0.9em] px-1 py-0.5 rounded",
     pre: "bg-blue-500/20 p-2 rounded my-3 overflow-x-auto",
-    ul: "list-disc pr-5 mb-3 space-y-1",
-    ol: "list-decimal pr-5 mb-3 space-y-1",
+    ul: "list-disc pr-5 mb-3 space-y-2",
+    ol: "list-decimal pr-5 mb-3 space-y-2",
     li: "mb-1",
-    h1: "text-sm font-bold mb-2",
+    h1: "text-sm font-bold mb-2 ",
     h2: "text-xs font-bold mb-2",
     h3: "text-xs font-semibold mb-1",
     blockquote: "border-blue-300 border-r-2 pr-2 italic my-2"
@@ -172,7 +182,7 @@ function UserMarkdownContent({content}) {
   );
 }
 
-function Message({message}) {
+function Message({message, chatbotConfig}) {
   const [isCopied, setIsCopied] = useState(false);
 
   const formatTime = (date) => {
@@ -181,6 +191,9 @@ function Message({message}) {
       minute: "2-digit"
     });
   };
+
+  const shouldType =
+    message.status === "typing" && message.sender === "support";
 
   return (
     <motion.div
@@ -193,7 +206,7 @@ function Message({message}) {
       <div
         className={`max-w-[85%] ${
           message.sender === "user"
-            ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+            ? `bg-[${chatbotConfig?.Color}] text-white`
             : "bg-white"
         } rounded-xl shadow-sm`}
       >
@@ -204,19 +217,18 @@ function Message({message}) {
                 <Bot className="w-3.5 h-3.5 text-blue-600" />
               </div>
               <div>
-                <div className="text-xs font-medium text-gray-900">
-                  پشتیبان هوشمند
+                <div className="text-xs font-bold text-black">
+                  {chatbotConfig?.title}
                 </div>
               </div>
             </div>
           )}
 
-          {message.status === "typing" && message.sender === "support" ? (
+          {message.sender === "support" && shouldType ? (
             <TypewriterMessage
               text={message.text}
-              onTypingComplete={() => {
-                // You could add an onTypingComplete handler here if needed
-              }}
+              shouldType={true}
+              onTypingComplete={() => {}}
             />
           ) : message.sender === "user" ? (
             <div className="text-xs leading-relaxed break-words text-white">
@@ -226,7 +238,6 @@ function Message({message}) {
             <div className="text-xs leading-relaxed break-words text-gray-800">
               <div className="flex flex-col">
                 <MarkdownContent content={message.text} />
-
                 <div className="flex mt-1 justify-end">
                   <TooltipProvider>
                     <Tooltip>
@@ -248,17 +259,17 @@ function Message({message}) {
             </div>
           )}
         </div>
-        <div className="px-2.5 py-1.5 border-t border-gray-100/10 flex items-center justify-end">
+        <div className="px-2.5 py-1.5  flex items-center justify-end">
           <div className="flex items-center gap-1.5">
             <span
               className={`text-[10px] ${
-                message.sender === "user" ? "text-blue-100" : "text-gray-500"
+                message.sender === "user" ? "text-white" : "text-gray-500"
               }`}
             >
               {formatTime(message.timestamp)}
             </span>
             {message.sender === "user" && (
-              <div className="text-blue-100">
+              <div className="text-white">
                 {message.status === "sent" ? (
                   <Check className="w-3 h-3" />
                 ) : (
@@ -272,5 +283,4 @@ function Message({message}) {
     </motion.div>
   );
 }
-
 export default Message;

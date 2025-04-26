@@ -3,7 +3,7 @@
 import {motion} from "framer-motion";
 import {MessageSquare, HelpCircle, Clock, Star, Bot} from "lucide-react";
 
-function EmptyStateMessage({isFullScreen}) {
+function EmptyStateMessage({isFullScreen, chatbotConfig}) {
   return (
     <motion.div
       initial={{opacity: 0, y: 20}}
@@ -12,9 +12,9 @@ function EmptyStateMessage({isFullScreen}) {
       className={`flex flex-col items-center justify-center px-4 py-6 text-center overflow-y-auto`}
     >
       <div
-        className={`${
-          isFullScreen ? "w-20 h-20" : "w-16 h-16"
-        } bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-lg`}
+        className={`${isFullScreen ? "w-20 h-20" : "w-16 h-16"} bg-[${
+          chatbotConfig?.Color
+        }] rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-lg`}
       >
         <MessageSquare
           className={`${isFullScreen ? "w-10 h-10" : "w-8 h-8"} text-white`}
@@ -26,7 +26,7 @@ function EmptyStateMessage({isFullScreen}) {
           isFullScreen ? "text-lg" : "text-base"
         } font-bold text-gray-800 mb-2 sm:mb-3`}
       >
-        به پشتیبانی هوشمند خوش آمدید
+        {chatbotConfig.welcomeMessage}
       </h3>
       <p
         className={`${

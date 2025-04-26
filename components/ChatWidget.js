@@ -1,32 +1,52 @@
 "use client";
 import {useState, useEffect} from "react";
 import {v4 as uuidv4} from "uuid";
-import {createThread, sendMessage, runWithStream} from "@/app/api/api";
+import {
+  createThread,
+  sendMessage,
+  runWithStream,
+  getChatbot
+} from "@/app/api/api";
 import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import ToggleChatButton from "./ToggleChatButton";
 
-function ChatWidget() {
+function ChatWidget({domain, chatBotId}) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [threadId, setThreadId] = useState(null);
-  const [assistantId] = useState("asst_0WxKHzZZugGKJqj0IT5OJQFy");
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [previousOpenState, setPreviousOpenState] = useState(false);
+  const [chatbotConfig, setChatbotConfig] = useState(null);
 
   useEffect(() => {
-    const initializeChat = async () => {
+    const initializeChatbot = async () => {
       try {
+        const chatbotData = await getChatbot(domain, chatBotId);
+        setChatbotConfig(chatbotData);
         const newThreadId = await createThread();
         setThreadId(newThreadId);
-      } catch (error) {
-        console.error("Error initializing chat:", error);
+      } catch (err) {
+        console.error("Error initializing chatbot:", err);
+        setError("خطا در بارگذاری چت‌بات. لطفاً دوباره تلاش کنید.");
       }
     };
-    initializeChat();
-  }, []);
+    initializeChatbot();
+  }, [chatBotId, domain]);
+
+  useEffect(() => {
+    if (isOpen !== previousOpenState) {
+      if (isOpen && !previousOpenState) {
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) => ({...msg, animated: true}))
+        );
+      }
+      setPreviousOpenState(isOpen);
+    }
+  }, [isOpen, previousOpenState]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,9 +65,10 @@ function ChatWidget() {
 
     try {
       await sendMessage(threadId, newMessage);
-
-      const stream = await runWithStream(threadId, assistantId);
+      const stream = await runWithStream(threadId, chatbotConfig.assistantId);
       const tempMessageId = uuidv4();
+      let accumulatedContent = "";
+
       setMessages((prev) => [
         ...prev,
         {
@@ -58,43 +79,47 @@ function ChatWidget() {
           status: "typing"
         }
       ]);
+
       const reader = stream.getReader();
       const decoder = new TextDecoder();
-
-      let fullMessageContent = "";
+      let buffer = "";
 
       while (true) {
         const {done, value} = await reader.read();
 
         if (done) {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === tempMessageId ? {...msg, status: "sent"} : msg
+            )
+          );
+          setIsTyping(false);
           break;
         }
 
-        const chunk = decoder.decode(value, {stream: true});
+        buffer += decoder.decode(value, {stream: true});
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
 
-        const lines = chunk.split("\n").filter((line) => line.trim());
         for (const line of lines) {
-          if (line.startsWith("data: ")) {
+          if (line.trim().startsWith("data: ")) {
+            const dataContent = line.substring(6).trim();
+
+            if (dataContent === "[DONE]") continue;
+
             try {
-              const dataContent = line.substring(6);
+              const parsedData = JSON.parse(dataContent);
 
-              if (dataContent.trim() === "[DONE]") {
-                continue;
-              }
-
-              const data = JSON.parse(dataContent);
-
-              if (data.object === "thread.message.delta") {
-                if (data.delta?.content?.length > 0) {
-                  for (const content of data.delta.content) {
+              if (parsedData.object === "thread.message.delta") {
+                if (parsedData.delta?.content?.length > 0) {
+                  for (const content of parsedData.delta.content) {
                     if (content.type === "text" && content.text?.value) {
-                      const textChunk = content.text.value;
-                      fullMessageContent += textChunk;
+                      accumulatedContent += content.text.value;
 
                       setMessages((prev) =>
                         prev.map((msg) =>
                           msg.id === tempMessageId
-                            ? {...msg, text: fullMessageContent}
+                            ? {...msg, text: accumulatedContent}
                             : msg
                         )
                       );
@@ -103,22 +128,14 @@ function ChatWidget() {
                 }
               }
             } catch (parseError) {
-              console.error(
-                "Error parsing JSON:",
-                parseError,
-                "Text:",
-                line.substring(6)
-              );
+              console.error("Error parsing stream data:", parseError);
             }
           }
         }
       }
-
-      setIsTyping(false);
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error processing stream:", error);
       setIsTyping(false);
-
       setMessages((prev) => [
         ...prev,
         {
@@ -133,12 +150,26 @@ function ChatWidget() {
   };
 
   const toggleFullScreen = () => {
+    if (!isFullScreen) {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => ({...msg, animated: true}))
+      );
+    }
     setIsFullScreen(!isFullScreen);
+  };
+
+  const toggleChat = () => {
+    if (!isOpen) {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => ({...msg, animated: true}))
+      );
+    }
+    setIsOpen(!isOpen);
   };
 
   const quickResponses = [
     "سلام، به کمک شما نیاز دارم",
-    "چگونه میتوانم به شما اعتماد کنم؟",
+    "چگونه می‌توانم به شما اعتماد کنم؟",
     "از شما ممنونم"
   ];
 
@@ -150,7 +181,11 @@ function ChatWidget() {
       dir="rtl"
     >
       {!isFullScreen && (
-        <ToggleChatButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+        <ToggleChatButton
+          chatbotConfig={chatbotConfig}
+          isOpen={isOpen}
+          onClick={toggleChat}
+        />
       )}
 
       {(isOpen || isFullScreen) && (
@@ -163,6 +198,7 @@ function ChatWidget() {
         >
           <ChatHeader
             isFullScreen={isFullScreen}
+            chatbotConfig={chatbotConfig}
             toggleFullScreen={toggleFullScreen}
             onClose={() => {
               setIsFullScreen(false);
@@ -172,12 +208,14 @@ function ChatWidget() {
 
           <MessageList
             isFullScreen={isFullScreen}
+            chatbotConfig={chatbotConfig}
             messages={messages}
             isTyping={isTyping}
           />
 
           <ChatInput
             newMessage={newMessage}
+            chatbotConfig={chatbotConfig}
             setNewMessage={setNewMessage}
             handleSubmit={handleSubmit}
             quickResponses={quickResponses}

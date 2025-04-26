@@ -3,7 +3,7 @@
 import {motion} from "framer-motion";
 import {MessageCircle, X} from "lucide-react";
 
-function ToggleChatButton({isOpen, onClick}) {
+function ToggleChatButton({isOpen, onClick, chatbotConfig}) {
   const handleClick = (e) => {
     e.stopPropagation();
     onClick();
@@ -13,7 +13,7 @@ function ToggleChatButton({isOpen, onClick}) {
     <motion.button
       type="button"
       onClick={handleClick}
-      className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300"
+      className={`w-12 h-12 bg-[${chatbotConfig?.Color}] rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300`}
       whileHover={{scale: 1.05}}
       whileTap={{scale: 0.95}}
     >

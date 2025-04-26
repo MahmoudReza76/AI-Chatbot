@@ -6,7 +6,7 @@ import {Bot} from "lucide-react";
 import Message from "./Message";
 import EmptyStateMessage from "./EmptyStateMessage";
 
-function MessageList({messages, isTyping, isFullScreen}) {
+function MessageList({messages, isTyping, isFullScreen, chatbotConfig}) {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -20,7 +20,10 @@ function MessageList({messages, isTyping, isFullScreen}) {
   if (messages.length === 0) {
     return (
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-primary/30 scrollbar-track-primary/10 scroll-smooth bg-gray-50">
-        <EmptyStateMessage isFullScreen={isFullScreen} />
+        <EmptyStateMessage
+          isFullScreen={isFullScreen}
+          chatbotConfig={chatbotConfig}
+        />
       </div>
     );
   }
@@ -28,7 +31,11 @@ function MessageList({messages, isTyping, isFullScreen}) {
   return (
     <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-primary/30 scrollbar-track-primary/10 scroll-smooth p-4 space-y-4 bg-gray-50">
       {messages.map((message) => (
-        <Message key={message.id} message={message} />
+        <Message
+          key={message.id}
+          message={message}
+          chatbotConfig={chatbotConfig}
+        />
       ))}
 
       {isTyping && !messages.some((msg) => msg.status === "typing") && (

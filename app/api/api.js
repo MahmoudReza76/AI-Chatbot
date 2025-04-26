@@ -1,7 +1,36 @@
 const token =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJlUUclMmYwYVNMZCUyYkElM2QiLCJuYmYiOjE3NDAzMTc5NTAsImV4cCI6MzMyNzYzMTc5NTAsImlhdCI6MTc0MDMxNzk1MCwiaXNzIjoiaHR0cDovL2lzc3Vlci5wYXlhbWFrLXBhbmVsLmNvbSIsImF1ZCI6Imh0dHA6Ly9hdWRpZW5jZS5wYXlhbWFrLXBhbmVsLmNvbSJ9.f8RIicwX496Pq2w9tRNQd2mAryQlSO4Q_TZrgRRWyX4";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJsUGpqMXF6SUN5WSUzZCIsIm5iZiI6MTc0NTY1NDM4NywiZXhwIjozMzI4MTY1NDM4NywiaWF0IjoxNzQ1NjU0Mzg3LCJpc3MiOiJodHRwOi8vaXNzdWVyLnBheWFtYWstcGFuZWwuY29tIiwiYXVkIjoiaHR0cDovL2F1ZGllbmNlLnBheWFtYWstcGFuZWwuY29tIn0.7LpEsCewgbQ-cnTNDhLH3UgmFv7fk8xCX0WIX9YbR78";
 
 const baseUrl = "https://rest2.payamak-panel.com/api/ai/assistant";
+
+//getchatbot
+export const getChatbot = async (domain, chatBotId) => {
+  try {
+    const response = await fetch(
+      `https://rest2.payamak-panel.com/api/chatbot/getchatbot`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          domain: domain,
+          chatBotId: chatBotId
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API error: ${JSON.stringify(errorData)}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to fetch chatbot: ${error.message}`);
+  }
+};
 
 export const createThread = async () => {
   const response = await fetch(`${baseUrl}/threads/`, {
