@@ -2,7 +2,13 @@ import {useState, useEffect, useRef} from "react";
 import {motion, AnimatePresence} from "framer-motion";
 import {Send, Paperclip, Image, Smile, Mic, Plus} from "lucide-react";
 
-function ChatInput({newMessage, setNewMessage, handleSubmit, quickResponses}) {
+function ChatInput({
+  newMessage,
+  setNewMessage,
+  handleSubmit,
+  quickResponses,
+  chatbotConfig
+}) {
   const [isTyping, setIsTyping] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -97,7 +103,7 @@ function ChatInput({newMessage, setNewMessage, handleSubmit, quickResponses}) {
             <button
               key={index}
               onClick={() => setNewMessage(response)}
-              className="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-600 rounded-full text-xs whitespace-nowrap hover:shadow-md hover:from-blue-100 hover:to-indigo-100 transition-all duration-200"
+              className={`px-3 py-1.5 bg-[${chatbotConfig?.Color}] text-white rounded-full text-xs whitespace-nowrap hover:shadow-md hover:from-blue-100 hover:to-indigo-100 transition-all duration-200`}
             >
               {response}
             </button>
@@ -172,7 +178,7 @@ function ChatInput({newMessage, setNewMessage, handleSubmit, quickResponses}) {
             disabled={!newMessage.trim()}
             className={`p-3 rounded-xl transition-colors relative ${
               isTyping
-                ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md hover:shadow-lg"
+                ? `bg-[${chatbotConfig?.Color}] text-white shadow-md hover:shadow-lg`
                 : "bg-gray-100 text-gray-400"
             }`}
           >
