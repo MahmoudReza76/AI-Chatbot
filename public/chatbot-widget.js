@@ -1,6 +1,6 @@
 (function () {
   const widgetConfig = {
-    widgetUrl: "https://your-vercel-app.vercel.app/widget",
+    widgetUrl: "https://ai-chatbot-eta-six-79.vercel.app/widget",
     domain: "test.danavan.ai",
     chatBotId: "ac5fefda-5607-49bd-a8fd-071ac64f6eba",
     containerId: "chatbot-widget-container",

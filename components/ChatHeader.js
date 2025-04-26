@@ -34,7 +34,7 @@ function ChatHeader({isFullScreen, toggleFullScreen, onClose, chatbotConfig}) {
             <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-white animate-pulse"></div>
           </div>
           <div>
-            <h3 className="text-sm font-bold">{chatbotConfig.title}</h3>
+            <h3 className="text-sm font-bold">{chatbotConfig?.title}</h3>
             <div className="text-xs text-white sm:flex hidden items-center gap-1">
               <span className="inline-block w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
               همیشه در دسترس

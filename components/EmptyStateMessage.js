@@ -26,7 +26,7 @@ function EmptyStateMessage({isFullScreen, chatbotConfig}) {
           isFullScreen ? "text-lg" : "text-base"
         } font-bold text-gray-800 mb-2 sm:mb-3`}
       >
-        {chatbotConfig.welcomeMessage}
+        {chatbotConfig?.welcomeMessage}
       </h3>
       <p
         className={`${
