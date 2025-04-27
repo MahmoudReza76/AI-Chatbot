@@ -14,8 +14,8 @@ import {
 function ChatHeader({isFullScreen, toggleFullScreen, onClose, chatbotConfig}) {
   return (
     <div
-      dir="rtl"
-      className={`bg-[${chatbotConfig?.Color}] text-white p-4 shadow-md`}
+      style={{backgroundColor: chatbotConfig?.Color}}
+      className="text-white p-4 shadow-md"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center sm:gap-3 gap-2">

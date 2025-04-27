@@ -204,11 +204,12 @@ function Message({message, chatbotConfig}) {
       }`}
     >
       <div
-        className={`max-w-[85%] ${
-          message.sender === "user"
-            ? `bg-[${chatbotConfig?.Color}] text-white`
-            : "bg-white"
-        } rounded-xl shadow-sm`}
+        className={`max-w-[85%] rounded-xl shadow-sm ${
+          message.sender === "user" ? "text-white" : "bg-white"
+        }`}
+        style={{
+          backgroundColor: message.sender === "user" ? chatbotConfig?.Color : ""
+        }}
       >
         <div className="p-2.5">
           {message.sender === "support" && (

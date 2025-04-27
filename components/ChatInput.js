@@ -103,7 +103,8 @@ function ChatInput({
             <button
               key={index}
               onClick={() => setNewMessage(response)}
-              className={`px-3 py-1.5 bg-[${chatbotConfig?.Color}] text-white rounded-full text-xs whitespace-nowrap hover:shadow-md hover:from-blue-100 hover:to-indigo-100 transition-all duration-200`}
+              className={`px-3 py-1.5 text-white rounded-full text-xs whitespace-nowrap hover:shadow-md hover:from-blue-100 hover:to-indigo-100 transition-all duration-200`}
+              style={{backgroundColor: chatbotConfig?.Color}}
             >
               {response}
             </button>
@@ -176,9 +177,12 @@ function ChatInput({
           <motion.button
             type="submit"
             disabled={!newMessage.trim()}
+            style={{
+              backgroundColor: isTyping ? chatbotConfig?.Color : ""
+            }}
             className={`p-3 rounded-xl transition-colors relative ${
               isTyping
-                ? `bg-[${chatbotConfig?.Color}] text-white shadow-md hover:shadow-lg`
+                ? "text-white shadow-md hover:shadow-lg"
                 : "bg-gray-100 text-gray-400"
             }`}
           >

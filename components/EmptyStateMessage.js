@@ -12,9 +12,10 @@ function EmptyStateMessage({isFullScreen, chatbotConfig}) {
       className={`flex flex-col items-center justify-center px-4 py-6 text-center overflow-y-auto`}
     >
       <div
-        className={`${isFullScreen ? "w-20 h-20" : "w-16 h-16"} bg-[${
-          chatbotConfig?.Color
-        }] rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-lg`}
+        style={{backgroundColor: chatbotConfig?.Color}}
+        className={`${
+          isFullScreen ? "w-20 h-20" : "w-16 h-16"
+        }  rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-lg`}
       >
         <MessageSquare
           className={`${isFullScreen ? "w-10 h-10" : "w-8 h-8"} text-white`}
